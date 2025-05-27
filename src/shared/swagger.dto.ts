@@ -15,26 +15,19 @@ export class ConfigDto implements IBackendConfig {
   AnimeDir: string;
 
   @ApiProperty({
-    description: 'The url of the anime provider (usually aniworld.to)',
-    example: 'https://aniworld.to',
-  })
-  AnimeUrl: string;
-
-  @ApiProperty({
     description: 'The path to the local Series Directory',
     example: '/series',
   })
   SeriesDir: string;
 
   @ApiProperty({
-    description: 'The url of the series provider (usually s.to)',
-    example: 'https://s.to',
-  })
-  SeriesUrl: string;
-
-  @ApiProperty({
     description: 'The Page Size used for paginated media',
     example: 100,
   })
   PageSize: number;
+}
+
+export class UploadProviderDto {
+  @ApiProperty({ type: 'string', format: 'binary' })
+  file: any;
 }

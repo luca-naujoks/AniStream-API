@@ -1,65 +1,55 @@
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { ExtendedProvider, Provider } from './provider.interface';
-import { ProviderRegistry } from './provider.registry';
+import {
+  ExtendedProvider,
+  Provider,
+  ProviderSandboxContext,
+} from './provider.interface';
 import { CronJob } from 'cron';
 import { MediaArraySchema } from 'src/shared/zod.interfaces';
 import { Logger } from '@nestjs/common';
 
-import ivm from 'isolated-vm';
+import { SqliteService } from 'src/sqlite/sqlite.service';
 
-export function scheduleProviders(
-  providerRegistry: ProviderRegistry,
-  schedulerRegistry: SchedulerRegistry,
-): void {
-  const providers: ExtendedProvider[] = providerRegistry.listProviders();
-  providers.forEach((provider) => {
-    const job = new CronJob(provider.schedule, async () => {
-      await jobExecutionWrapper({
-        provider,
-      });
+export function scheduleProvider({
+  provider,
+  schedulerRegistry,
+  sqliteService,
+}: {
+  provider: ExtendedProvider;
+  schedulerRegistry: SchedulerRegistry;
+  sqliteService: SqliteService;
+}) {
+  const job = new CronJob(provider.schedule, async () => {
+    await jobExecutionWrapper({
+      provider,
+      sqliteService,
     });
-    schedulerRegistry.addCronJob(provider.name, job);
-    if (provider.enabled) {
-      job.start();
-      Logger.log(`Scheduled provider with name: ${provider.name}`);
-    } else {
-      job.stop();
-    }
   });
+  schedulerRegistry.addCronJob(provider.name, job);
+  if (provider.enabled) {
+    job.start();
+    Logger.log(`Scheduled provider with name: ${provider.name}`);
+  } else {
+    job.stop();
+  }
 }
 
 async function jobExecutionWrapper({
   provider,
+  sqliteService,
 }: {
   provider: Provider;
+  sqliteService: SqliteService;
 }): Promise<void> {
-  const isolate = new ivm.Isolate({ memoryLimit: 128 }); // Limit memory usage to 128 MB
-  const context = await isolate.createContext();
-  const jail = context.global;
-
-  const fetchDataWrapper = async () => {
-    return await provider.fetchData();
+  const providerContext: ProviderSandboxContext = {
+    getDBItems: async () => sqliteService.media.getAllMedia({}),
   };
 
-  // Set up the global object in the sandbox
-  await jail.set('global', jail.derefInto());
-  await jail.set('fetchData', new ivm.Reference(fetchDataWrapper));
-
   try {
-    // Execute the fetchData function in the sandbox
-    const result: unknown = await context.evalClosure(
-      `
-        async function executeFetch() {
-          return await fetchData.apply(undefined, []);
-        }
-        executeFetch();
-      `,
-      [], // No arguments passed to the closure
-      { timeout: 5000 }, // Timeout after 5 seconds
-    );
+    const executedProvider = await provider.fetchData(providerContext);
 
     // Validate the result using Zod
-    const parsedData = MediaArraySchema.safeParse(result);
+    const parsedData = MediaArraySchema.safeParse(executedProvider);
 
     if (!parsedData.success) {
       Logger.error('Data Validation Failed');
@@ -67,10 +57,8 @@ async function jobExecutionWrapper({
     }
 
     Logger.log('Inserting data into DB');
-    // TODO: Insert parsedData.data into the database
+    await sqliteService.media.createMedia(parsedData.data.newMedia || []);
   } catch (error) {
     Logger.error('Job execution failed:', error);
-  } finally {
-    isolate.dispose(); // Clean up the isolate
   }
 }

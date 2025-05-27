@@ -82,10 +82,11 @@ export class SqliteService {
           })
           .skip(
             page
-              ? page * (this.configService.get<number>('PageSize') ?? 10)
+              ? page *
+                  (this.configService.get<number>('appConfig.PageSize') ?? 10)
               : 0,
           )
-          .take(this.configService.get<number>('PageSize'))
+          .take(this.configService.get<number>('appConfig.PageSize'))
           .getMany();
       }
       return this.mediaRepository
@@ -95,25 +96,28 @@ export class SqliteService {
           name: search ? `%${search}%` : '%',
         })
         .skip(
-          page ? page * (this.configService.get<number>('PageSize') ?? 10) : 0,
+          page
+            ? page *
+                (this.configService.get<number>('appConfig.PageSize') ?? 10)
+            : 0,
         )
-        .take(this.configService.get<number>('PageSize'))
+        .take(this.configService.get<number>('appConfig.PageSize'))
         .addSelect(
           selectedFields ? selectedFields.map((field) => `media.${field}`) : [],
         )
         .getMany();
     },
     getOne: async ({
-      stream_name,
+      external_identifier,
     }: {
-      stream_name: string;
+      external_identifier: string;
     }): Promise<Media> => {
       const media = await this.mediaRepository.findOne({
-        where: { stream_name },
+        where: { external_identifier },
       });
       if (!media) {
         throw new NotFoundException(
-          `Media with stream_name ${stream_name} not found`,
+          `Media with external_identifier ${external_identifier} not found`,
         );
       }
       return media;
@@ -138,7 +142,9 @@ export class SqliteService {
       return media;
     },
     updateMedia: async (media: MediaObjectDTO): Promise<Media> => {
-      await this.media.getOne({ stream_name: media.stream_name });
+      await this.media.getOne({
+        external_identifier: media.external_identifier,
+      });
       return await this.mediaRepository.save(media);
     },
 

@@ -44,6 +44,8 @@ export class DetailedMediaService {
     private readonly configService: ConfigService,
   ) {}
 
+  api_key = this.configService.get<string>('appConfig.TmdbApiKey');
+
   async getSeasonForMedia(
     tmdb_id: number,
     seasonNumber: number,
@@ -57,8 +59,7 @@ export class DetailedMediaService {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization:
-              'Bearer ' + this.configService.get<string>('TMDB_API_KEY'),
+            Authorization: 'Bearer ' + this.api_key,
           },
         },
       );
@@ -100,11 +101,11 @@ export class DetailedMediaService {
     return season;
   }
 
-  async getDetailedMedia(stream_name: string): Promise<IDetailedMedia> {
+  async getDetailedMedia(external_identifier: string): Promise<IDetailedMedia> {
     let tmdbData: ItmdbData;
 
     const localData: Media = await this.sqliteService.media.getOne({
-      stream_name: stream_name,
+      external_identifier: external_identifier,
     });
 
     if (!localData) {
@@ -132,8 +133,7 @@ export class DetailedMediaService {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization:
-              'Bearer ' + this.configService.get<string>('TMDB_API_KEY'),
+            Authorization: 'Bearer ' + this.api_key,
           },
         },
       );
@@ -166,7 +166,7 @@ export class DetailedMediaService {
       id: localData.id,
       type: localData.type,
       tmdb_id: localData.tmdb_id,
-      stream_name: localData.stream_name,
+      external_identifier: localData.external_identifier,
       name: localData.name,
       tags: tmdbData.tags,
       poster: localData.poster,
@@ -191,8 +191,7 @@ export class DetailedMediaService {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization:
-            'Bearer ' + this.configService.get<string>('TMDB_API_KEY'),
+          Authorization: 'Bearer ' + this.api_key,
         },
       },
     );
@@ -205,7 +204,7 @@ export class DetailedMediaService {
           id: 0,
           type: 'unknown',
           tmdb_id: result.id,
-          stream_name: 'unknown',
+          external_identifier: 'unknown',
           name: result.name,
           tags: [] as { id: number; name: string }[],
           poster: 'https://image.tmdb.org/t/p/original' + result.poster_path,
@@ -234,8 +233,7 @@ export class DetailedMediaService {
     const response = await fetch(`https://api.themoviedb.org/3/tv/${tmdb_id}`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization:
-          'Bearer ' + this.configService.get<string>('TMDB_API_KEY'),
+        Authorization: 'Bearer ' + this.api_key,
       },
     });
 

@@ -21,7 +21,7 @@ export class DetailedMediaController {
 
   @Get()
   @ApiQuery({
-    name: 'stream_name',
+    name: 'external_identifier',
     type: String,
     example: 'gods-games-we-play',
     description: 'The Stream Name of the Media to get detailed information for',
@@ -35,8 +35,8 @@ export class DetailedMediaController {
   @ApiAmbiguousResponse({
     description: 'The detailed media object was not found',
   })
-  getDetailedMedia(@Query('stream_name') stream_name: string) {
-    return this.detailedMediaService.getDetailedMedia(stream_name);
+  getDetailedMedia(@Query('external_identifier') external_identifier: string) {
+    return this.detailedMediaService.getDetailedMedia(external_identifier);
   }
 
   @Get('season')
@@ -72,14 +72,14 @@ export class DetailedMediaController {
   })
   @Put('update-tmdb')
   async updateTmdbData(
-    @Query('stream_name') stream_name: string,
+    @Query('external_identifier') external_identifier: string,
     @Query('tmdb_id') tmdb_id: number,
   ) {
     const oldMedia: Media = await this.sqliteService.media.getOne({
-      stream_name: stream_name,
+      external_identifier: external_identifier,
     });
     if (!oldMedia) {
-      console.error('Media not found:', stream_name);
+      console.error('Media not found:', external_identifier);
       return;
     }
     const tmdbData = await this.detailedMediaService.getTmdbData(tmdb_id);
@@ -99,7 +99,7 @@ export class DetailedMediaController {
       {
         type: 'info',
         user: 'system',
-        message: `Updated ${updatedMedia.stream_name}, new tmdb_id: ${updatedMedia.tmdb_id}`,
+        message: `Updated ${updatedMedia.external_identifier}, new tmdb_id: ${updatedMedia.tmdb_id}`,
       },
     ]);
 

@@ -2,11 +2,12 @@ import * as fs from 'fs';
 import { IBackendConfig } from './shared/OutputInterfaces';
 import { Logger } from '@nestjs/common';
 import path from 'path';
+import { registerAs } from '@nestjs/config';
 
 const configPath: string = 'storage/appConfig.json';
 const storagePath: string = 'storage';
 
-export default () => {
+export default registerAs('appConfig', () => {
   // create storage directory if not exsisting
   if (!fs.existsSync(storagePath)) {
     fs.mkdirSync(storagePath);
@@ -38,7 +39,7 @@ export default () => {
   ) as IBackendConfig;
 
   return config;
-};
+});
 
 export function updateConfig(newConfig: IBackendConfig) {
   try {

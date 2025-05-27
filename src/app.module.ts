@@ -29,6 +29,7 @@ import { ProviderModule } from './provider/provider.module';
 import appConfig from './app.config';
 import { modules } from './shared/typeOrmImports';
 import { ProviderRegistry } from './provider/provider.registry';
+import { ProviderService } from './provider/provider.service';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ProviderRegistry } from './provider/provider.registry';
     DetailedMediaService,
     SqliteService,
     WatchlistService,
+    ProviderService,
     ProviderRegistry,
   ],
 })

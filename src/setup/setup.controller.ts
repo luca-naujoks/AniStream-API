@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpException, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiResponse,
@@ -45,10 +46,11 @@ export class SetupController {
     return;
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Returns the current configuration of the Backend' })
   @Get()
   getConfig() {
-    const config = this.configService.get<IBackendConfig>('');
+    const config = this.configService.get<IBackendConfig>('appConfig');
 
     return config;
   }

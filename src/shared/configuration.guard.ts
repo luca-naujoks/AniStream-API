@@ -1,4 +1,4 @@
-import { CanActivate, Injectable, Logger } from '@nestjs/common';
+import { CanActivate, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IBackendConfig } from './OutputInterfaces';
 
@@ -8,8 +8,7 @@ export class ConfigGuard implements CanActivate {
 
   canActivate(): boolean {
     const configState: IBackendConfig | undefined =
-      this.configService.get<IBackendConfig>('');
-    Logger.log(configState);
+      this.configService.get<IBackendConfig>('appConfig');
 
     const configured: boolean =
       configState?.AnimeDir &&

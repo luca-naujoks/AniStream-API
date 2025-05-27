@@ -10,7 +10,7 @@ export interface IDetailedMedia {
   id: number;
   type: string; // unknown
   tmdb_id: number; // id
-  stream_name: string; // unknown
+  external_identifier: string; // unknown
   name: string; // name
   tags: { id: number; name: string }[]; // unknown
   poster: string; // poster_path

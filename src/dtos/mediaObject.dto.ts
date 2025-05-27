@@ -10,9 +10,9 @@ export class MediaObjectDTO {
   @IsInt()
   tmdb_id: number;
 
-  @IsNotEmpty({ message: 'Field stream_name must be added' })
+  @IsNotEmpty({ message: 'Field external_identifier must be added' })
   @IsString()
-  stream_name: string;
+  external_identifier: string;
 
   @IsNotEmpty({ message: 'Field name must be added' })
   @IsString()

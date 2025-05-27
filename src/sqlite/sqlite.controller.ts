@@ -25,9 +25,9 @@ export class SqliteController {
 
   @ApiTags('SQLMedia')
   @Get()
-  async getMedia(@Query('stream_name') stream_name: string) {
+  async getMedia(@Query('external_identifier') external_identifier: string) {
     return await this.sqliteService.media.getOne({
-      stream_name: stream_name,
+      external_identifier: external_identifier,
     });
   }
 
@@ -65,7 +65,7 @@ export class SqliteController {
         value: {
           type: 'anime',
           tmdb_id: 76059,
-          stream_name: 'a-place-further-than-the-universe',
+          external_identifier: 'a-place-further-than-the-universe',
           name: 'A Place Further Than the Universe',
           poster:
             'https://image.tmdb.org/t/p/original/iERXyBf0K6DfAQ8oKEYrdjf1vIs.jpg',

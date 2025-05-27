@@ -12,12 +12,12 @@ export class Media {
   tmdb_id: number;
 
   @Column({
-    name: 'stream_name',
+    name: 'external_identifier',
     type: 'varchar',
     length: 255,
     nullable: false,
   })
-  stream_name: string;
+  external_identifier: string;
 
   @Column({ name: 'name', type: 'varchar', length: 255, nullable: false })
   name: string;
